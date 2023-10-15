@@ -91,6 +91,7 @@ function createBigViewPokemonBox(pokemon) {
     const height = pokemon.height;
     const experience = pokemon.base_experience;
     const abilities = pokemon.abilities.map(a => a.ability.name).join(", ");
+
     
 
     return `
@@ -113,19 +114,28 @@ function createBigViewPokemonBox(pokemon) {
                 <h2 onclick="openAbilities()">Abilities</h2>
             </div>
             <div class="poke-big-view-box-info-content">
-                <div class="box-info-about-details">
-                    <h4><b>Weight:</b></h4>
-                    <h4 class="poke-weight">${weight} kg</h4>
+
+                <div class="box-info-about hidden" id="box-info-about-id">
+                
+                    <div class="box-info-about-details">
+                        <h4><b>Weight:</b></h4>
+                        <h4 class="poke-weight">${weight} kg</h4>
+                    </div>
+                    <div class="box-info-about-details">
+                        <h4><b>Height:</b></h4>
+                        <h4>${height} m</h4>
+                    </div>
+                    <div class="box-info-about-details">
+                        <h4><b>Experience:</b></h4>
+                        <h4>${experience}</h4>
+                    </div>
+            </div>
+
+                <div class="box-info-stats-details hidden" id="box-info-stats-details-id">
+                <!-- Hier können Sie Ihre Statistik-Daten und Balkendiagramme hinzufügen -->
                 </div>
-                <div class="box-info-about-details">
-                    <h4><b>Height:</b></h4>
-                    <h4>${height} m</h4>
-                </div>
-                <div class="box-info-about-details">
-                    <h4><b>Experience:</b></h4>
-                    <h4>${experience}</h4>
-                </div>
-                <div class="box-info-ablility-details" id="box-info-ablility-details-id">
+
+                <div class="box-info-ablility-details hidden" id="box-info-ablility-details-id">
                     <div class="abilities">
                         <h4>${abilities}</h4>
                     </div>
@@ -141,7 +151,8 @@ async function openBigView(id) {
     let response = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`);
     let pokemon = await response.json();
     const type = pokemon.types[0].type.name;
-    const color = colors[type];
+      const color = colors[type];
+      const abilities = pokemon.abilities[0].ability.name;
 
     bigViewContainer.innerHTML = createBigViewPokemonBox(pokemon);
     const bigViewBox = bigViewContainer.querySelector(".poke-big-view-box");
@@ -153,6 +164,8 @@ async function openBigView(id) {
   } catch (error) {
     console.error("Fehler beim Abrufen des Pokémon:", error);
   }
+    openAbout();
+
 }
 
 
@@ -199,6 +212,36 @@ function updateNavigationButtons() {
   } else {
     rightNavButton.style.display = "block";
   }
+}
+
+function openAbout() {
+  const aboutDetails = document.querySelector(".box-info-about");
+  const statsDetails = document.querySelector(".box-info-stats-details");
+  const abilityDetails = document.querySelector(".box-info-ablility-details");
+
+  aboutDetails.classList.remove("hidden");
+  statsDetails.classList.add("hidden");
+  abilityDetails.classList.add("hidden");
+}
+
+function openChart() {
+  const aboutDetails = document.querySelector(".box-info-about");
+  const statsDetails = document.querySelector(".box-info-stats-details");
+  const abilityDetails = document.querySelector(".box-info-ablility-details");
+
+  aboutDetails.classList.add("hidden");
+  statsDetails.classList.remove("hidden");
+  abilityDetails.classList.add("hidden");
+}
+
+function openAbilities() {
+  const aboutDetails = document.querySelector(".box-info-about");
+  const statsDetails = document.querySelector(".box-info-stats-details");
+  const abilityDetails = document.querySelector(".box-info-ablility-details");
+
+  aboutDetails.classList.add("hidden");
+  statsDetails.classList.add("hidden");
+  abilityDetails.classList.remove("hidden");
 }
 
 
