@@ -16,26 +16,31 @@ const colors = {
   ice: "#e0f5ff ",
 };
 
-const searchInput = document.getElementById("poke-input");
-const searchBtn = document.getElementById("btn-search");
 const pokeContainer = document.getElementById("poke-container");
 
 let allPokemonBoxes = [];
 let currentPokemonId = 1;
-const pokeLimit = 20;
+let pokemonDataCache = {};
+let pokemonCache = {};
+
+const pokeLimit = 30;
+
 
 async function initPokemon() {
   for (let i = 1; i <= pokeLimit; i++) {
       await getPokemon(i);
   }
+    console.log(pokemonCache);
 }
 
 async function getPokemon(id) {
   let url = `https://pokeapi.co/api/v2/pokemon/${id}`;
   let response = await fetch(url);
   let data = await response.json();
+  pokemonCache[id] = data; // Daten im Cache speichern
   createPokemonBox(data);
 }
+
 
 function createPokemonBox(pokemon) {
   const name = pokemon.name[0].toUpperCase() + pokemon.name.slice(1); // Zieht den Namen aus dem ArrayApi und schreibt den ersten Buchstaben groß. Mit slice wird nur der erste Buchstabe (1) groß geschrieben und der Rest wieder klein
@@ -83,33 +88,47 @@ function clearInput() {
   document.getElementById("poke-input").value = "";
 }
 
-function createBigViewPokemonBox(pokemon) {
+async function createBigViewPokemonBox(id) {
+  try {
+    let pokemon = pokemonCache[id]; // Daten aus dem Cache holen
+    if (!pokemon) {
+      console.error("Pokémon-Daten nicht gefunden für ID:", id);
+      return "";
+    }
+
     const name = pokemon.name[0].toUpperCase() + pokemon.name.slice(1);
-    const id = pokemon.id.toString().padStart(3, "0");
+    const paddedId = pokemon.id.toString().padStart(3, "0");
     const weight = pokemon.weight;
     const type = pokemon.types[0].type.name;
     const height = pokemon.height;
     const experience = pokemon.base_experience;
-    const abilities = pokemon.abilities.map(a => a.ability.name).join(", ");
+    const abilities = pokemon.abilities.map((a) => a.ability.name.charAt(0).toUpperCase() + a.ability.name.slice(1).toLowerCase()).join("<br><br>");
 
-    
+    return createBigViewPokemonHtml(id,name,paddedId,weight,type,height,experience,abilities);
+  } catch (error) {
+    console.error("Fehler beim Abrufen des Pokémon:", error);
+    return ""; // Rückgabe eines leeren Strings im Fehlerfall
+  }
+}
 
+function createBigViewPokemonHtml(id, name, paddedId, weight, type, height, experience, abilities) {
     return `
         
         <div class="poke-big-view-box">
             <div class="close-btn">
                 <img src="./img/close-btn.png" class="close-btn" onclick="closeBigView()"alt="">
             </div>
-            <img src="https://assets.pokemon.com/assets/cms2/img/pokedex/full/${id}.png" alt="">
+                <img src="https://assets.pokemon.com/assets/cms2/img/pokedex/full/${paddedId}.png" alt="" onerror="console.error('Fehler beim Laden des Bildes:', this.src);">
+
             <nav class="nav-btns">
             <div><img src="./img/left-btn.png" onclick="leftButton()" id="leftButton"></div>
             <div><img src="./img/right-btn.png" onclick="rightButton()" id="rightButton"></div>
             </nav>
             <h4 class="poke-name">${name}</h4>
-            <p class="poke-id">#${id}</p>
+            <p class="poke-id">#${paddedId}</p>
             <p class="poke-type">Type: ${type}</p>
             <div class="poke-big-view-box-info" id="poke-big-view-box-info-id">
-                <h2 onclick="openAbout()" class="underlined">About</h2>
+                <h2 onclick="openAbout()">About</h2>
                 <h2 onclick="openChart()">Stats</h2>
                 <h2 onclick="openAbilities()">Abilities</h2>
             </div>
@@ -139,84 +158,56 @@ function createBigViewPokemonBox(pokemon) {
                     <div class="abilities">
                         <h4>${abilities}</h4>
                     </div>
+
                 </div>
             </div>
         </div>
-    `;
+  `;
+ 
 }
 
-async function openBigView(id) {
-  const bigViewContainer = document.getElementById("big-view-poke-container");
-  try {
-    let response = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`);
-    let pokemon = await response.json();
-    const type = pokemon.types[0].type.name;
-    const color = colors[type];
 
-    bigViewContainer.innerHTML = createBigViewPokemonBox(pokemon);
-    const bigViewBox = bigViewContainer.querySelector(".poke-big-view-box");
-    bigViewBox.style.backgroundColor = color;
-    bigViewContainer.style.display = "block";
+ async function openBigView(id) {
+   const bigViewContainer = document.getElementById("big-view-poke-container");
 
-    let pokemonStats = {};
-    pokemon.stats.forEach((stat) => {
-      pokemonStats[stat.stat.name] = stat.base_stat;
-    });
+   if (!pokemonCache[id]) {
+     await getPokemon(id); // Daten erneut abrufen, wenn sie nicht im Cache sind
+   }
 
-    const ctx = document.getElementById("myChartId");
-    const labels = [
-      "hp",
-      "attack",
-      "defense",
-      "special-attack",
-      "special-defense",
-      "speed",
-    ];
-    const data = labels.map((label) => pokemonStats[label]);
+   const pokemonBoxHtml = await createBigViewPokemonBox(id);
+   bigViewContainer.innerHTML = pokemonBoxHtml;
 
-    const myChart = new Chart(ctx, {
-      type: "bar",
-      data: {
-        labels: labels,
-        datasets: [
-          {
-            label: "Base Stats",
-            data: data,
-            backgroundColor: [
-              "rgba(255, 99, 132, 0.2)",
-              "rgba(255, 159, 64, 0.2)",
-              "rgba(255, 205, 86, 0.2)",
-              "rgba(75, 192, 192, 0.2)",
-              "rgba(54, 162, 235, 0.2)",
-              "rgba(153, 102, 255, 0.2)",
-              "rgba(201, 203, 207, 0.2)",
-            ],
-            borderColor: colors[type],
-            borderWidth: 1,
-          },
-        ],
-      },
-      options: {
-        indexAxis: "y",
-        scales: {
-          x: {
-            display: false,
-          },
-          y: {
-            beginAtZero: true,
-          },
-        },
-      },
-    });
+   let pokemon = pokemonCache[id]; // Daten aus dem Cache holen
+   let pokemonStats = {};
+   pokemon.stats.forEach((stat) => {
+   pokemonStats[stat.stat.name] = stat.base_stat;
+   });
 
-    currentPokemonId = id;
-    updateNavigationButtons();
-  } catch (error) {
-    console.error("Fehler beim Abrufen des Pokémon:", error);
-  }
+   const type = pokemon.types[0].type.name;
+   const color = colors[type];
+   const bigViewBox = bigViewContainer.querySelector(".poke-big-view-box");
+   bigViewBox.style.backgroundColor = color;
+   bigViewContainer.style.display = "block";
 
-  openAbout();
-}
+   const ctx = document.getElementById("myChartId");
+   const labels = [
+     "hp",
+     "attack",
+     "defense",
+     "special-attack",
+     "special-defense",
+     "speed",
+   ];
+
+   const data = labels.map((label) => pokemonStats[label]);
+
+
+
+   currentPokemonId = id;
+   updateNavigationButtons();
+   openAbout();
+   createPokemonChart(ctx, labels, data, colors[type]);
+ }
 
 
 
