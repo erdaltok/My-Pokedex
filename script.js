@@ -114,6 +114,7 @@ async function createBigViewPokemonBox(id) {
 function createBigViewPokemonHtml(id, name, paddedId, weight, type, height, experience, abilities) {
     return `
         
+    <div class="center">
         <div class="poke-big-view-box">
             <div class="close-btn">
                 <img src="./img/close-btn.png" class="close-btn" onclick="closeBigView()"alt="">
@@ -151,7 +152,7 @@ function createBigViewPokemonHtml(id, name, paddedId, weight, type, height, expe
             </div>
 
                 <div class="box-info-stats-details hidden" id="box-info-stats-details-id">
-                        <canvas id="myChartId" width="306" height="152" style-"display: block; box-sizing: border-box; height: 152px; width: 306px;"> </canvas>
+                        <canvas id="myChartId" width="306" height="152" style-"display: block; box-sizing: border-box; height: 137px; width: 306px;"> </canvas>
                 </div>
 
                 <div class="box-info-ablility-details hidden" id="box-info-ablility-details-id">
@@ -161,6 +162,7 @@ function createBigViewPokemonHtml(id, name, paddedId, weight, type, height, expe
 
                 </div>
             </div>
+        </div>
         </div>
   `;
  
@@ -189,18 +191,18 @@ function createBigViewPokemonHtml(id, name, paddedId, weight, type, height, expe
    bigViewBox.style.backgroundColor = color;
    bigViewContainer.style.display = "block";
 
-   const ctx = document.getElementById("myChartId");
-   const labels = [
-     "hp",
-     "attack",
-     "defense",
-     "special-attack",
-     "special-defense",
-     "speed",
-   ];
 
-   const data = labels.map((label) => pokemonStats[label]);
+     const ctx = document.getElementById("myChartId");
+     const labels = [
+       "hp",
+       "attack",
+       "defense",
+       "special-attack",
+       "special-defense",
+       "speed",
+     ];
 
+     const data = labels.map((label) => pokemonStats[label]);
 
 
    currentPokemonId = id;
