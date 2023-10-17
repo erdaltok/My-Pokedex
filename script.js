@@ -116,7 +116,7 @@ function createBigViewPokemonBox(pokemon) {
             <div class="poke-big-view-box-info-content">
 
                 <div class="box-info-about hidden" id="box-info-about-id">
-                
+
                     <div class="box-info-about-details">
                         <h4><b>Weight:</b></h4>
                         <h4 class="poke-weight">${weight} kg</h4>
@@ -132,7 +132,7 @@ function createBigViewPokemonBox(pokemon) {
             </div>
 
                 <div class="box-info-stats-details hidden" id="box-info-stats-details-id">
-                <!-- Hier können Sie Ihre Statistik-Daten und Balkendiagramme hinzufügen -->
+                        <canvas id="myChartId" width="306" height="152" style-"display: block; box-sizing: border-box; height: 152px; width: 306px;"> </canvas>
                 </div>
 
                 <div class="box-info-ablility-details hidden" id="box-info-ablility-details-id">
@@ -146,27 +146,78 @@ function createBigViewPokemonBox(pokemon) {
 }
 
 async function openBigView(id) {
-    const bigViewContainer = document.getElementById("big-view-poke-container");
+  const bigViewContainer = document.getElementById("big-view-poke-container");
   try {
     let response = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`);
     let pokemon = await response.json();
     const type = pokemon.types[0].type.name;
-      const color = colors[type];
-      const abilities = pokemon.abilities[0].ability.name;
+    const color = colors[type];
 
     bigViewContainer.innerHTML = createBigViewPokemonBox(pokemon);
     const bigViewBox = bigViewContainer.querySelector(".poke-big-view-box");
     bigViewBox.style.backgroundColor = color;
-      bigViewContainer.style.display = "block";
+    bigViewContainer.style.display = "block";
 
-    currentPokemonId = id; 
-    updateNavigationButtons(); 
+    let pokemonStats = {};
+    pokemon.stats.forEach((stat) => {
+      pokemonStats[stat.stat.name] = stat.base_stat;
+    });
+
+    const ctx = document.getElementById("myChartId");
+    const labels = [
+      "hp",
+      "attack",
+      "defense",
+      "special-attack",
+      "special-defense",
+      "speed",
+    ];
+    const data = labels.map((label) => pokemonStats[label]);
+
+    const myChart = new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: "Base Stats",
+            data: data,
+            backgroundColor: [
+              "rgba(255, 99, 132, 0.2)",
+              "rgba(255, 159, 64, 0.2)",
+              "rgba(255, 205, 86, 0.2)",
+              "rgba(75, 192, 192, 0.2)",
+              "rgba(54, 162, 235, 0.2)",
+              "rgba(153, 102, 255, 0.2)",
+              "rgba(201, 203, 207, 0.2)",
+            ],
+            borderColor: colors[type],
+            borderWidth: 1,
+          },
+        ],
+      },
+      options: {
+        indexAxis: "y",
+        scales: {
+          x: {
+            display: false,
+          },
+          y: {
+            beginAtZero: true,
+          },
+        },
+      },
+    });
+
+    currentPokemonId = id;
+    updateNavigationButtons();
   } catch (error) {
     console.error("Fehler beim Abrufen des Pokémon:", error);
   }
-    openAbout();
 
+  openAbout();
 }
+
 
 
 function closeBigView() {
