@@ -170,45 +170,60 @@ function createBigViewPokemonHtml(id, name, paddedId, weight, type, height, expe
 
 
  async function openBigView(id) {
-   const bigViewContainer = document.getElementById("big-view-poke-container");
-
    if (!pokemonCache[id]) {
-     await getPokemon(id); // Daten erneut abrufen, wenn sie nicht im Cache sind
+     await getPokemon(id);
    }
 
-   const pokemonBoxHtml = await createBigViewPokemonBox(id);
-   bigViewContainer.innerHTML = pokemonBoxHtml;
+   const bigViewContainer = document.getElementById("big-view-poke-container");
+   bigViewContainer.innerHTML = await createBigViewPokemonBox(id); // Stellen Sie sicher, dass das HTML korrekt eingefügt wird
 
-   let pokemon = pokemonCache[id]; // Daten aus dem Cache holen
-   let pokemonStats = {};
-   pokemon.stats.forEach((stat) => {
-   pokemonStats[stat.stat.name] = stat.base_stat;
-   });
-
-   const type = pokemon.types[0].type.name;
-   const color = colors[type];
-   const bigViewBox = bigViewContainer.querySelector(".poke-big-view-box");
-   bigViewBox.style.backgroundColor = color;
-   bigViewContainer.style.display = "block";
-
-
-     const ctx = document.getElementById("myChartId");
-     const labels = [
-       "hp",
-       "attack",
-       "defense",
-       "special-attack",
-       "special-defense",
-       "speed",
-     ];
-
-     const data = labels.map((label) => pokemonStats[label]);
-
-
-   currentPokemonId = id;
+   displayBigView(id); // Rufen Sie displayBigView NACH dem Einfügen des HTML auf
+   setupPokemonStatsChart(id);
    updateNavigationButtons();
    openAbout();
+ }
+
+ function displayBigView(id) {
+   const bigViewContainer = document.getElementById("big-view-poke-container");
+
+   const type = pokemonCache[id].types[0].type.name;
+   const color = colors[type];
+   const bigViewBox = bigViewContainer.querySelector(".poke-big-view-box");
+
+   if (bigViewBox) {
+     bigViewBox.style.backgroundColor = color;
+   } else {
+     console.error("Element .poke-big-view-box nicht gefunden");
+   }
+
+   bigViewContainer.style.display = "block";
+   currentPokemonId = id;
+ }
+
+ function setupPokemonStatsChart(id) {
+   const ctx = document.getElementById("myChartId").getContext("2d");
+   const labels = [
+     "hp",
+     "attack",
+     "defense",
+     "special-attack",
+     "special-defense",
+     "speed",
+   ];
+   const pokemonStats = getPokemonStats(pokemonCache[id]);
+   const data = labels.map((label) => pokemonStats[label]);
+   const type = pokemonCache[id].types[0].type.name;
+
    createPokemonChart(ctx, labels, data, colors[type]);
+ }
+
+
+ function getPokemonStats(pokemon) {
+   let stats = {};
+   pokemon.stats.forEach((stat) => {
+     stats[stat.stat.name] = stat.base_stat;
+   });
+   return stats;
  }
 
 
