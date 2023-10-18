@@ -161,8 +161,8 @@
   }
 
   .poke-box img:hover {
-      transform: scale(1.1, 1.1);
-      transition: 0.5s;
+      transform: scale(1.5, 1.5);
+      transition: 0.5s ease;
   }
 
   .poke-box h4 {
