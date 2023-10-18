@@ -38,6 +38,8 @@ async function getPokemon(id) {
   let url = `https://pokeapi.co/api/v2/pokemon/${id}`;
   let response = await fetch(url);
   let data = await response.json();
+    console.log("Save Pokémon ID:", id, "Data:", data);
+
   pokemonCache[id] = data; // abgerufene Daten im Cache speichern
   createPokemonBox(data);
 }
@@ -54,14 +56,24 @@ function createPokemonBox(pokemon) {
   pokemonElement.classList.add("poke-box");
   pokemonElement.style.backgroundColor = `${color}`;
 
+  pokemonElement.setAttribute("data-id", id); // (XXX2) Das Attribut data-id wird dem pokemonElement hinzugefügt und mit der ID des Pokémon befüllt. Mit dem kann man die ID des Pokemon erkennen, wenn auf ein Pokemon geklickt wird.
+
+  pokemonElement.addEventListener("click", function () {
+    const pokemonId = parseInt(this.getAttribute("data-id"), 10); // Wenn auf das Pokemon geklickt wird, wird die data-id extrahiert und in eine Ganzzahl umgewandelt. + Die 10, gibt an, dass die Konvertierung im Dezimalsystem (Basis 10) -- Internetrecherche -- durchgeführt werden soll.
+    openBigView(pokemonId);
+  });
+
   pokemonElement.innerHTML = createHtmlOfPokemon(id, name, weight, type);
   pokeContainer.appendChild(pokemonElement);
   allPokemonBoxes.push(pokemonElement);
 }
 
+// HTML template. (XXX1) Hier musste ich die onclick Funktion mit data-id ersetzen, da ich immer ein fehler beim Aufruf hatte und bei einigen Pokemon die falsche ID übergben worden ist. 
+// in der oberen Funktion createPokemonBox(pokemon) habe ich einen EventListener einfügen müssen
 function createHtmlOfPokemon(id, name, weight, type) {
   return `
-  <div onclick="openBigView(${id})">
+<div data-id="${id}"> 
+ 
       <img src="https://assets.pokemon.com/assets/cms2/img/pokedex/full/${id}.png" alt="">
       <h4 id="poke-name" class="poke-name">${name}</h4>
       <p id="poke-id" class="poke-id">#${id}</p>
@@ -175,7 +187,9 @@ function createBigViewPokemonHtml(id, name, paddedId, weight, type, height, expe
 }
 
 // (1) Funktion nur zum Öffnen der BigView-Ansicht. Zur Übersichtlichkeit auf DREI Funktionen aufgeteilt (d.h. inkl. den beiden folgenden Funktionen "displayBigView(id)" und "setupPokemonStatsChart(id)")
- async function openBigView(id) {
+async function openBigView(id) {
+     console.log("Opening Big View for Pokémon ID:", id);
+
    if (!pokemonCache[id]) {
      await getPokemon(id);
    }
