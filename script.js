@@ -198,7 +198,11 @@ function createBigViewPokemonHtml(id, name, paddedId, weight, type, height, expe
 
    bigViewContainer.style.display = "block";
    currentPokemonId = id;
+
+   setupCloseOnOutsideClick(); // Fügen Sie diese Zeile hinzu
  }
+
+
 
  function setupPokemonStatsChart(id) {
    const ctx = document.getElementById("myChartId").getContext("2d");
@@ -233,6 +237,19 @@ function closeBigView() {
 
   bigViewContainer.style.display = "none";
 }
+
+function setupCloseOnOutsideClick() {
+  const bigViewContainer = document.getElementById("big-view-poke-container");
+
+  bigViewContainer.addEventListener("click", function (event) {
+    // Überprüfen, ob das Ziel des Klick-Events der bigViewContainer selbst ist
+    if (event.target === bigViewContainer) {
+      closeBigView();
+    }
+  });
+}
+
+
 
 function leftButton() {
   if (currentPokemonId > 1) {
