@@ -191,7 +191,7 @@ async function openBigView(id) {
 
    bigViewContainer.style.display = "block";
    currentPokemonId = id;
-
+ 
    CloseOnOutsideClick(); // Funktionsaufruf, um die Close-Funktion außerhalb von der Pokemon-Box in der BigView einzufügen
  }
 

@@ -144,14 +144,8 @@
       margin-top: -12px;
   }
 
-  /* .poke-big-view-box img:hover {
-      transform: scale(1.1, 1.1);
-      transition: 0.2s;
-  } */
-
   .poke-big-view-box h4 {
       font-size: 34px;
-
   }
 
   .poke-big-view-box p {
@@ -333,7 +327,7 @@
       }
 
       .poke-big-view-box img {
-          margin-top: -24px;
+          margin-top: -18px;
       }
 
       .close-btn {
@@ -345,7 +339,7 @@
       }
 
       .poke-big-view-box-info h2 {
-          font-size: 29px;
+          font-size: 24px;
       }
 
       .box-info-about-details h4 {
@@ -366,5 +360,7 @@
 
       .poke-box {
           margin-top: 0px;
+          margin-left: 0;
+          width: 280px;
       }
   }
